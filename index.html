@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>小學中文學習（首頁）</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+        sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #fef3c7);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .home-title {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+
+    .home-subtitle {
+      font-size: 1rem;
+      color: #4b5563;
+      margin-bottom: 32px;
+    }
+
+    .level-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .level-button {
+      min-width: 120px;
+      padding: 14px 20px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: #2563eb;
+      color: white;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.2s;
+      font-family: inherit;
+    }
+
+    .level-button.disabled {
+      background: #9ca3af;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .level-button:not(.disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="home-title">小學中文學習（廣東話）</div>
+  <div class="home-subtitle">每日 5 個字，練聽、練讀、練講</div>
+  <div class="level-buttons">
+    <!-- 小一：連去 p1.html -->
+    <a href="p1.html">
+      <button class="level-button">小一</button>
+    </a>
+
+    <!-- 小二、小三暫時未開放 -->
+    <button class="level-button disabled" disabled>小二（未開放）</button>
+    <button class="level-button disabled" disabled>小三（未開放）</button>
+  </div>
+</body>
+</html>

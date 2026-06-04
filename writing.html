@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chinese Writing</title>
+
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer/dist/hanzi-writer.min.js"></script>
+
+<style>
+
+.grid-box{
+  width:470x;
+  height:470px;
+  position:relative;
+  border:1px solid #ddd;
+  overflow:hidden;
+  position:relative;
+}
+.grid-box::before,
+.grid-box::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+z-index:0;
+}
+
+
+.grid-box::before{
+  background:
+    linear-gradient(
+      to right,
+      transparent 49.8%,
+      #ccc 50%,
+      transparent 50.2%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 49.8%,
+      #ccc 50%,
+      transparent 50.2%
+    );
+}
+
+.grid-box::after{
+  background:
+    linear-gradient(
+      45deg,
+      transparent 49.8%,
+      #ddd 50%,
+      transparent 50.2%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 49.8%,
+      #ddd 50%,
+      transparent 50.2%
+    );
+}
+#demo,
+#practice{
+  position:relative;
+  z-index:1;
+}
+
+
+
+</style>
+</head>
+<body>
+
+<div style="display:flex;gap:30px;justify-content:center;">
+
+  <div class="grid-box">
+    <div id="demo"></div>
+  </div>
+
+<div class="grid-box">
+
+  <div id="practice"></div>
+
+</div>
+</div>
+
+<script>
+const currentDay =
+  window.parent.currentDay;
+
+let words = [];
+let currentIndex = 0;
+let currentStroke = 0;
+let totalStrokes = 0;
+
+let expectedStroke = 0;
+
+let demoWriter;
+let practiceWriter;
+let writer;
+
+function loadWord() {
+
+  const hint =
+    document.getElementById("writeHint");
+
+  document.getElementById("demo").innerHTML = "";
+  document.getElementById("practice").innerHTML = "";
+
+  currentStroke = 0;
+expectedStroke = 0;
+
+demoWriter = HanziWriter.create(
+  "demo",
+  words[currentIndex],
+  {
+    width:470,
+    height:470,
+    padding:20,
+
+    strokeColor:"#333333",
+    outlineColor:"#DDDDDD",
+
+    showCharacter:false,
+    showOutline:true
+  }
+);
+
+demoWriter.getCharacterData().then(data => {
+
+  totalStrokes = data.strokes.length;
+
+
+});
+practiceWriter = HanziWriter.create(
+  "practice",
+  words[currentIndex],
+  {
+    width:470,
+    height:470,
+    padding:20,
+
+    strokeColor:"#333333",
+    outlineColor:"#DDDDDD",
+
+    showCharacter:false,
+    showOutline:true
+  }
+);
+  practiceWriter.quiz({
+
+onCorrectStroke(data) {
+if(!data){
+    return;
+  }
+if(data.strokeNum !== expectedStroke){
+    return;
+}
+expectedStroke++;
+
+  currentStroke++;
+
+  console.log("stroke", currentStroke);
+
+if(currentStroke < totalStrokes){
+
+    setTimeout(() => {
+
+        demoWriter.animateStroke(currentStroke);
+
+    }, 600);
+
+} else {
+
+    demoWriter.showCharacter();
+
+    setTimeout(() => {
+
+        startFreeWrite();
+
+    }, 1000);
+
+}
+}
+  });
+
+demoWriter.animateStroke(
+  0,
+  {
+    duration:1800
+  }
+);
+}
+
+let freeWriteMode = false;
+
+
+function startFreeWrite(){
+
+  freeWriteMode = true;
+
+  document.getElementById("practice").innerHTML = "";
+
+practiceWriter = HanziWriter.create(
+  "practice",
+  words[currentIndex],
+  {
+    width:470,
+    height:470,
+    padding:20,
+
+    strokeColor:"#333333",
+    outlineColor:"#DDDDDD",
+
+    showCharacter:false,
+    showOutline:true
+  }
+);
+practiceWriter.quiz({
+
+  onComplete() {
+
+    setTimeout(() => {
+      nextWord();
+ }, 1500);
+  }
+
+});
+}
+
+function nextWord() {
+
+  currentIndex++;
+
+if(currentIndex >= words.length){
+
+  window.parent.setRoundCompleted(
+    window.parent.currentDay,
+    7
+  );
+
+  setTimeout(() => {
+
+    currentIndex = 0;
+    loadWord();
+
+    // 保持 Tick
+    const tick =
+      window.parent.document.getElementById(
+        "writingTick"
+      );
+
+    if(tick){
+      tick.style.opacity = "1";
+    }
+
+  }, 2000);
+
+  return;
+}
+  loadWord();
+}
+
+words =
+  window.parent.dayWords?.[
+    window.parent.currentDay
+  ] || [];
+
+console.log(
+  "currentDay=",
+  window.parent.currentDay
+);
+
+console.log(
+  "words=",
+  window.parent.dayWords?.[
+    window.parent.currentDay
+  ]
+);
+
+
+if(words.length > 0){
+
+  loadWord();
+
+}else{
+
+  console.error(
+    "No words found for day",
+    window.parent.currentDay
+  );
+
+}
+
+</script>
+</body>
+</html>

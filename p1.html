@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>小一中文學習</title>
+
+  <!-- 字型 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", system-ui, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#learning {
+  display: flex;
+  height: 100vh;      /* 🔴 關鍵 */
+  overflow: hidden;   /* 整頁唔 scroll */
+}
+
+.sidebar {
+  width: 230px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #111827;
+  background: #111827;
+  color: #e5e7eb;
+  padding: 16px 12px;
+}
+
+
+
+/* header / footer 固定 */
+.sidebar-header,
+.sidebar-footer {
+  flex-shrink: 0;
+}
+
+/* 中間 Day list 滾動 */
+.day-list {
+  flex: 1;            /* 🔴 撐滿中間 */
+  overflow-y: auto;   /* ✅ 左邊 scroll */
+}
+
+.main {
+  flex: 1;
+  height: 100%;        /* 🔴 一定要 */
+  overflow-y: auto;    /* ✅ 右邊 scroll */
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+
+
+/* ===== 右邊內容 ===== */
+#content {
+  flex: 1;
+  height: 100%;       /* 🔴 一定要有 */
+  overflow-y: auto;   /* ✅ 右邊 scroll */
+  padding: 16px;
+  box-sizing: border-box;
+}
+    button { font-family: inherit; cursor: pointer; }
+
+
+
+    .sidebar-header {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #f9fafb;
+    }
+
+    .back-home-btn {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: none;
+      background: #374151;
+      color: #e5e7eb;
+    }
+    .back-home-btn:hover { background: #4b5563; }
+
+    .day-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .day-button {
+      width: 100%;
+      text-align: left;
+      padding: 6px 10px;
+      margin-bottom: 2px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.9rem;
+      background: transparent;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.1s ease, transform 0.05s ease;
+    }
+
+    .day-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .day-label-main {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f9fafb;
+    }
+
+    .day-words {
+      font-size: 0.9rem;
+      color: #e5e7eb;
+    }
+
+    .day-button.active {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    .day-button.unlocked:not(.active):hover { background: #1f2933; }
+    .day-button.locked { opacity: 0.4; cursor: not-allowed; }
+
+    /* 進度圓形 */
+    .day-progress {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+     background: #4a4b4c;
+
+      position: relative;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .day-progress-fill {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 0%;
+      background: #22c55e;
+      transition: height 0.25s ease-out;
+border-radius: 999px;
+    }
+.day-progress[data-tip]:hover::after{
+  content: attr(data-tip);
+
+  position:absolute;
+  right:20px;
+  top:50%;
+  transform:translateY(-50%);
+
+  background:#111827;
+  color:white;
+
+  border:1px solid #22c55e;
+
+  padding:4px 8px;
+  border-radius:6px;
+
+  font-size:12px;
+  white-space:nowrap;
+  z-index:99999;
+}
+
+    .sidebar-footer {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+
+    /* -------- 右邊主畫面 -------- */
+
+.main {
+  flex: 1;
+  padding: 24px clamp(16px, 4vw, 32px) 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;                 /* ★ 將 24px 改成 0 */
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* 所有 section 不要額外 margin，否則 round 4/5/6 會同 round 3 不同距離 */
+section {
+  margin: 0;
+  padding: 0;
+}
+
+
+    /* 共用 round 標題 */
+
+    .round-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+
+    .round-title-wrap {
+      position: relative;
+      display: inline-block;
+      padding-right: 55px;
+    }
+
+    .round-title {
+      font-size: 2.4rem;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #2563eb;
+    }
+
+    .round-title-tick {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: #22c55e;
+      line-height: 1;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .round-title-tick.shown {
+      opacity: 1;
+      animation: tick-pop 0.35s ease-out;
+    }
+
+    @keyframes tick-pop {
+      0%   { transform: translateY(-50%) scale(0.7); opacity: 0; }
+      60%  { transform: translateY(-50%) scale(1.05); opacity: 1; }
+      100% { transform: translateY(-50%) scale(1.0); opacity: 1; }
+    }
+
+    .round-instruction {
+      font-size: 0.9rem;
+      color: #6b7280;
+      text-align: center;
+      margin-top: -6px;
+    }
+
+    .round-instruction img.inline-mic {
+      width: 18px;
+      height: 18px;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+
+    /* Round 1 / Round 4 Cards */
+
+.cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+  margin: 24px auto 0;  /* 上 24px，同時左右 auto 置中 */
+}
+
+    .word-card {
+      background: white;
+      border-radius: 18px;
+      padding: 16px 20px 20px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 220px;
+      max-width: 40vw;
+      min-height: 260px;
+    }
+
+/* main-char 固定尺寸，內部兩張圖重疊顯示（預設 show default pica） */
+.main-char {
+  font-family: "Noto Sans TC", system-ui, sans-serif;
+  font-size: 125px;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  color: #111827;
+  cursor: default;
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Round1 底層 pica 圖 */
+.base-image {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  transition: opacity 0.4s ease;   /* ⭐ 底圖都會淡出 */
+}
+
+/* 上面嗰張 gif（pic_...gif） */
+.char-image {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.main-char.show-pic .base-image {
+  opacity: 0;              /* ⭐ 底圖唔見，淨係見到 gif */
+}
+
+/* 令圖片喺個框內，自動收細，不會推開其他元素 */
+.main-char img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* 原本顯示的圖（pica_...） */
+.char-image-default,
+.char-image-hover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 保持比例，不會撐走 layout */
+  max-width: 100%;
+  max-height: 100%;
+  transition: opacity 0.35s ease;
+  pointer-events: none; /* 圖片唔攔截滑鼠事件 */
+  display: block;
+}
+
+/* 預設：show default 圖，hover 圖透明 */
+.char-image-default { opacity: 1; }
+.char-image-hover  { opacity: 0; }
+
+/* 加 class 之後：hover 圖淡入，default 圖淡出 */
+.main-char.show-pic .char-image-default { opacity: 0; }
+.main-char.show-pic .char-image-hover  { opacity: 1; }
+
+/* 文字層（備用，如果你想 fallback 顯示中文字） */
+.char-text {
+  position: relative;
+  z-index: 2;
+  transition: opacity 0.25s ease;
+  color: #111827;
+  font-size: 2.6rem; /* 只會在沒有圖片時用到，按需要調整 */
+}
+
+/* 當有圖片時，可能隱藏文字（如果你不想顯示中文字可用） */
+.main-char.has-image .char-text { opacity: 0; }
+
+.main-char.show-pic .char-image {
+  opacity: 1;
+}
+
+    .translation {
+      font-size: 1.2rem;
+      color: #a3a4a6;
+      text-align: center;
+      word-wrap: break-word;
+      word-break: break-word;
+      min-height: 3.2rem;
+    }
+
+    /* Round 4 詞語：中文字放大 1.5 倍 */
+    .phrase-text {
+      font-size: 3.6em; /* 比原來大 1.5 倍 */
+    }
+
+    .actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: auto;
+      height: 40px;
+      position: relative;
+    }
+
+    .icon-btn {
+      border: none;
+      background: transparent;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* loading 旋轉圈 */
+
+    .loader-rotate {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid #d1d5db;
+      border-top-color: #2563eb;
+      animation: rotate 0.8s linear infinite;
+      box-sizing: border-box;
+      display: none;
+    }
+
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    /* Round 分隔線 */
+
+/* Round 分隔線（所有 round 共用，同一闊度同距離） */
+.round-separator {
+  width: 100%;
+  align-self: stretch;
+  margin: 32px 0 24px; 
+}
+
+    /* Round 2 & 6 ：句子 list */
+
+.round2-list,
+.round6-list {
+  width: 100%;
+  max-width: 720px;
+  margin: 24px auto 0;  /* 上 24px，左右 auto 置中 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+    .round2-item,
+    .round6-item {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .round2-phrase,
+    .round6-sentence-cn {
+      font-size: 1.9rem;
+      letter-spacing: 0.35em;
+      padding-left: 0.35em;
+    }
+
+    .round6-sentence-cn {
+      letter-spacing: normal;
+      padding-left: 0;
+    }
+
+    .round6-sentence-en {
+      font-size: 1.1rem;
+      color: #a3a4a6;
+      margin-top: 4px;
+    }
+
+    .round2-right,
+    .round6-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .round2-status,
+    .round6-status {
+      font-size: 1.4rem;
+    }
+.wrong-char {
+  color: #b91c1c;
+  font-weight: normal;
+}
+    /* Round 3 & 5 Matching */
+
+.match-board {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin: 24px auto 0;   /* 上 24px，左右 auto → 完全置中 */
+}
+
+    .match-card {
+      width: 140px;
+      height: 140px;
+      border-radius: 20px;
+      background: #ffffff;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+      position: relative;
+    }
+
+    .match-card-cn {
+      font-size: 3.0rem;
+    }
+
+    .match-card-en {
+      font-size: 1.2rem;
+      line-height: 1.8;
+    }
+
+    .match-card.selected {
+      background: #eff6ff;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.3);
+      transform: translateY(-3px);
+    }
+
+    .match-card.matched {
+      pointer-events: none;
+    }
+
+    @keyframes magic-pop {
+      0%   { transform: scale(1); opacity: 1; box-shadow: 0 8px 20px rgba(15,23,42,0.15); }
+      50%  { transform: scale(1.1); opacity: 1; box-shadow: 0 14px 30px rgba(59,130,246,0.4); }
+      100% { transform: scale(0.8); opacity: 0; box-shadow: 0 0 0 rgba(0,0,0,0); }
+    }
+
+    .match-card.magic-vanish {
+      animation: magic-pop 0.4s ease-out forwards;
+    }
+
+    @keyframes card-shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+
+    .match-card.shake {
+      animation: card-shake 0.35s ease;
+    }
+
+    @media (max-width: 900px) {
+      .word-card { width: 180px; min-height: 220px; }
+      .main-char { font-size: 100px; }
+      .translation { font-size: 1.2rem; }
+      .icon-img { width: 28px; height: 28px; }
+      .round2-phrase,
+      .round6-sentence-cn { font-size: 1.6rem; }
+      .match-card { width: 130px; height: 130px; }
+    }
+
+    /* Summary list */
+
+.summary-list {
+      width: 100%;
+      max-width: 720px;   /* 還原之前的闊度 */
+      margin: 16px auto 0;
+    }
+
+#round4Section,
+#round5Section,
+#round6Section,
+#summarySection {
+  width: 100%;
+  align-self: stretch;   /* 喺 .main (flex column) 裏面拉滿橫向 */
+}
+
+#round4Section .round-instruction,
+#round5Section .round-instruction,
+#round6Section .round-instruction {
+  margin-top: -6px;   /* 保持同之前一樣 */
+}
+
+.summary-list {
+  max-width: 900px; /* 比 720px 闊 25%～30% */
+}
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+      font-size: 1rem;
+    }
+
+    .summary-table th,
+    .summary-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .summary-table th {
+      background: #f3f4f6;
+      text-align: left;
+      font-weight: 600;
+      color: #4b5563;
+    }
+
+    .summary-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .summary-cn {
+      font-size: 1.4rem;
+    }
+
+    .summary-en {
+      color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      #learning { flex-direction: column; }
+      .sidebar { width: 100%; }
+
+      .day-list {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .day-button { width: auto; min-width: 130px; }
+      .main { padding-top: 16px; }
+
+      .word-card { width: 160px; min-height: 200px; }
+      .main-char { font-size: 88px; }
+      .icon-img { width: 26px; height: 26px; }
+      .round2-phrase,
+      .round6-sentence-cn { font-size: 1.4rem; }
+      .match-card { width: 120px; height: 120px; }
+    }
+/* === FINAL LAYOUT FIX：所有 round 1–6 + Summary 用同一 spacing === */
+
+/* 分隔線：全部一樣闊、一樣上下距離 */
+
+/* 分隔線之後第一個 title（無論有冇包 section） */
+.round-separator + .round-bar,
+.round-separator + section > .round-bar {
+  margin-top: 0;
+}
+
+/* Title → instruction 距離（全部 round 一樣） */
+.round-bar + .round-instruction {
+  margin-top: 20px;
+}
+
+/* Instruction → 內容（cards / match board / list / summary）距離（全部一樣） */
+.round-instruction + .cards-row,
+.round-instruction + .match-board,
+.round-instruction + .round2-list,
+.round-instruction + .round6-list,
+.round-instruction + .summary-list {
+  margin-top: 40px;
+}
+
+/* 所有內容板塊：置中 */
+.cards-row,
+.match-board,
+.round2-list,
+.round6-list,
+.summary-list {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* 強制所有 section 內的 round title → instruction 距離 */
+section .round-bar + .round-instruction {
+  margin-top: 20px !important;
+}
+
+.round2-audio {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 0;   /* 上細、下 0，避免推開卡 */
+}
+
+.round2-audio .icon-img {
+  width: 42px;
+  height: 42px;
+}
+
+/* 左邊 day list scrollbar（Chrome / Edge / Safari） */
+.day-list::-webkit-scrollbar {
+  width: 4px;              /* 幼啲 */
+}
+
+.day-list::-webkit-scrollbar-track {
+  background: transparent; /* ❌ 灰底 */
+}
+
+.day-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.35); /* 深灰白 */
+  border-radius: 10px;
+}
+
+.day-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Firefox */
+.day-list {
+  scrollbar-width: thin;                         /* thin */
+  scrollbar-color: rgba(255,255,255,0.35) transparent;
+}
+
+
+  </style>
+</head>
+<body>
+  <div id="learning">
+    <!-- 左側選單 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span>小一課程</span>
+        <a href="index.html">
+          <button class="back-home-btn">返回主頁</button>
+        </a>
+      </div>
+      <div class="day-list" id="dayList"></div>
+      <div class="sidebar-footer">
+        暫時只開 Day 1 測試。
+      </div>
+    </aside>
+
+    <!-- 右側主畫面 -->
+    <main class="main">
+<!-- Round 1 -->
+<div class="round-bar">
+  <div class="round-title-wrap">
+    <span class="round-title" id="roundTitle1">Round 1 : Listen</span>
+ <span id="round1Tick" class="round-title-tick">✔</span>
+  </div>
+</div>
+<div class="round-instruction">
+  Click 
+<img src="image/play.png" class="inline-mic" alt="mic" /> to listen.
+</div>
+<div class="cards-row" id="cardsRowRound1"></div>
+
+
+<!-- Round 2 : Listen & Choose -->
+<hr class="round-separator" />
+<div class="round-bar">
+  <div class="round-title-wrap">
+    <span class="round-title" id="roundTitle2">Round 2 : Listen & Choose</span>
+    <span id="round2ListenTick" class="round-title-tick">✔</span>
+  </div>
+</div>
+<div class="round-instruction">
+  Listen to the sound. Click the correct Chinese character.
+</div>
+<div class="round2-audio">
+  <button id="round2PlayBtn" class="icon-btn">
+    <img src="image/play.png" class="icon-img" />
+  </button>
+</div>
+
+<div id="round2ListenBoard" class="match-board"></div>
+
+
+
+      <!-- Round 3 Matching -->
+      <hr class="round-separator" />
+      <div class="round-bar">
+        <div class="round-title-wrap">
+          <span class="round-title" id="roundTitle4">Round 3 : Matching</span>
+          <span id="round3Tick" class="round-title-tick">✔</span>
+        </div>
+      </div>
+      <div class="round-instruction">
+        Match each Chinese character with the correct English meaning.
+      </div>
+      <div id="round3Board" class="match-board"></div>
+
+<!-- Round 4 Phrases -->
+<hr class="round-separator" />
+<section id="round4Section">
+  <div class="round-bar">
+    <div class="round-title-wrap">
+      <span class="round-title" id="roundTitle5">Round 4 : Phrases</span>
+      <span id="round4Tick" class="round-title-tick">✔</span>
+    </div>
+  </div>
+  <div class="round-instruction">
+    Read the phrase. Press
+    <img src="image/speak.png" class="inline-mic" alt="mic" />
+    to speak.
+  </div>
+  <div class="cards-row" id="cardsRowRound4"></div>
+</section>
+
+<!-- Round 5 Phrase Matching -->
+<hr class="round-separator" />
+<section id="round5Section">
+  <div class="round-bar">
+    <div class="round-title-wrap">
+      <span class="round-title" id="roundTitle6">Round 5 : Phrase Matching</span>
+      <span id="round5Tick" class="round-title-tick">✔</span>
+    </div>
+  </div>
+  <div class="round-instruction">
+    Match the phrases with the English meanings.
+  </div>
+  <div id="round5Board" class="match-board"></div>
+</section>
+
+<!-- Round 6 Sentences -->
+<section id="round6Section">
+  <hr class="round-separator" />
+  <div class="round-bar">
+    <div class="round-title-wrap">
+      <span class="round-title" id="roundTitle7">Round 6 : Sentences</span>
+      <span id="round6Tick" class="round-title-tick">✔</span>
+    </div>
+  </div>
+  <div class="round-instruction">
+    Read the sentence. Press
+    <img src="image/speak.png" class="inline-mic" alt="mic" />
+    to speak.
+  </div>
+  <div id="round6List" class="round6-list"></div>
+</section>
+
+
+<!-- Writing -->
+<hr class="round-separator" />
+
+<section id="writingSection">
+
+  <div class="round-bar">
+    <div class="round-title-wrap">
+     <span class="round-title">Writing</span>
+<span id="writingTick"
+      class="round-title-tick">
+✔ 
+</span>
+    </div>
+  </div>
+
+  <div class="round-instruction">
+👀 Watch → ✏️ Copy → ✏️ Write Again
+  </div>
+
+<iframe
+id="writingFrame"
+src="writing.html"
+width="1100"
+height="500"
+style="
+  border:none;
+  display:block;
+  margin:30px auto 0 auto;
+">
+</iframe>
+
+</section>
+
+<!-- Summary -->
+<hr class="round-separator" />
+<section id="summarySection">
+  <div class="round-bar">
+    <div class="round-title-wrap">
+      <span class="round-title">Summary</span>
+    </div>
+  </div>
+  <div class="round-instruction">
+    Review all you learned today.
+  </div>
+  <div id="summaryList" class="summary-list"></div>
+</section>
+   
+ </main>
+  </div>
+  <script src="data.js"></script>
+
+  <script>
+
+    // 🚩 本機 Node.js ASR server
+    const WHISPER_BASE_URL = "http://localhost:8080";
+
+// Section 元素 & title
+const summarySectionEl = document.getElementById("summarySection");
+const summaryListEl = document.getElementById("summaryList");
+
+const round6Section = document.getElementById("round6Section");
+const round4SectionEl = document.getElementById("round4Section");
+const round5SectionEl = document.getElementById("round5Section");
+const round6SectionEl = document.getElementById("round6Section");
+const round6TitleEl   = document.getElementById("roundTitle6");
+
+    let currentDay = 1;
+window.currentDay = currentDay;
+    
+const tickAudio =
+  new Audio("audio/click2.mp3");
+
+tickAudio.preload = "auto";
+tickAudio.volume = 0.5;
+
+function playTickSound(){
+
+  tickAudio.currentTime = 0;
+
+  tickAudio.play().catch(() => {});
+
+}
+/* =======================
+       Round 完成進度
+    ======================= */
+
+    // dayRoundCompleted[day] = [r1Done, r2Done, ...]
+    const dayRoundCompleted = {
+      1: [false, false, false, false, false, false, false]
+    };
+
+function setRoundCompleted(day, roundNumber) {
+
+  console.log(
+    "Before:",
+    dayRoundCompleted[day]
+  );
+
+  console.log(
+    "Round",
+    roundNumber,
+    dayRoundCompleted[day][roundNumber - 1]
+  );
+
+  if(!dayRoundCompleted[day][roundNumber - 1]){
+
+console.log("PLAY SOUND");
+
+setTimeout(() => {
+
+  console.log("TRY PLAY");
+
+  playTickSound();
+
+}, 1000);
+  }
+
+  dayRoundCompleted[day][roundNumber - 1] = true;
+
+  localStorage.setItem(
+    `day-${day}-round-${roundNumber}`,
+    "done"
+  );
+
+  renderDayList();
+
+}
+
+function loadRoundProgress(day){
+
+  if(!dayRoundCompleted[day]){
+    dayRoundCompleted[day] = Array(7).fill(false);
+  }
+
+  for(let i = 1; i <= 7; i++){
+
+    if(
+      localStorage.getItem(
+        `day-${day}-round-${i}`
+      ) === "done"
+    ){
+      dayRoundCompleted[day][i - 1] = true;
+    }
+
+  }
+
+}
+
+function getDayProgress(day) {
+  const completedArr = dayRoundCompleted[day] || [];
+  const total = getTotalRoundsForDay(day);
+
+  let completed = 0;
+  for (let i = 0; i < completedArr.length; i++) {
+    if (completedArr[i]) completed++;
+  }
+
+  return total === 0 ? 0 : completed / total;
+}
+    /* =======================
+       Day list 渲染
+    ======================= */
+
+    const dayListEl = document.getElementById("dayList");
+
+function renderDayList() {
+  dayListEl.innerHTML = "";
+  for (let day = 1; day <= TOTAL_DAYS; day++) {
+    const btn = document.createElement("button");
+    btn.className = "day-button";
+
+    const unlocked = true;          // 👈 所有 Day 都解鎖
+    if (unlocked) {
+      btn.classList.add("unlocked");
+      btn.disabled = false;
+    }
+
+    if (day === currentDay) btn.classList.add("active");
+        const infoDiv = document.createElement("div");
+        infoDiv.className = "day-info";
+
+        const labelMain = document.createElement("div");
+        labelMain.className = "day-label-main";
+        labelMain.textContent = `Day ${day}`;
+
+        const wordsLine = document.createElement("div");
+        wordsLine.className = "day-words";
+        const data = dayData[day];
+        wordsLine.textContent = data ? data.title : "";
+
+        infoDiv.appendChild(labelMain);
+        infoDiv.appendChild(wordsLine);
+
+        // Progress circle
+        const progressWrap = document.createElement("div");
+        progressWrap.className = "day-progress";
+if(getDayProgress(day) > 0){
+  progressWrap.dataset.tip = "Clear";
+  progressWrap.style.cursor = "pointer";
+}
+        const fill = document.createElement("div");
+        fill.className = "day-progress-fill";
+
+        const ratio = getDayProgress(day);
+        fill.style.height = (ratio * 100).toFixed(0) + "%";
+
+        progressWrap.appendChild(fill);
+progressWrap.addEventListener("click", (e) => {
+
+  e.stopPropagation();
+
+  if(getDayProgress(day) === 0){
+    return;
+  }
+
+  clearDayProgress(day);
+
+});
+
+        btn.appendChild(infoDiv);
+        btn.appendChild(progressWrap);
+
+        if (unlocked) {
+          btn.addEventListener("click", () => setCurrentDay(day));
+        }
+
+        dayListEl.appendChild(btn);
+      }
+    }
+
+function setCurrentDay(day) {
+resetAllRoundTicks();   // ✅ 一定要最早做
+
+  currentDay = day;
+window.currentDay = day;
+  resetRoundsForDay(day);   // ✅ 重要！
+
+  round2UserHasInteracted = false;
+  resetRound2ListenChooseState();
+
+  renderDayList();
+
+  renderRound1();
+  renderRound2ListenChoose();
+  renderRound3();
+  renderRound4();
+  renderRound5();
+  renderRound6();
+
+  updateRoundVisibilityForDay();
+  renderSummary();
+restoreRoundTicks();
+ // ===== 恢復 Writing Tick =====
+
+const writingDone =
+  localStorage.getItem(
+    `day-${currentDay}-round-7`
+  );
+
+  const writingTick =
+    document.getElementById("writingTick");
+
+  if(writingTick){
+
+    if(writingDone === "done"){
+      writingTick.style.opacity = "1";
+    }else{
+      writingTick.style.opacity = "0";
+    }
+
+  }
+const writingFrame =
+  document.getElementById("writingFrame");
+
+if(writingFrame){
+  writingFrame.src = writingFrame.src;
+}
+}
+
+function restoreRoundTicks(){
+
+  if(dayRoundCompleted[currentDay][0])
+    round1TickEl.classList.add("shown");
+
+  if(dayRoundCompleted[currentDay][1])
+    round2ListenTickEl.classList.add("shown");
+
+  if(dayRoundCompleted[currentDay][2])
+    round3TickEl.classList.add("shown");
+
+  if(dayRoundCompleted[currentDay][3])
+    round4TickEl.classList.add("shown");
+
+  if(dayRoundCompleted[currentDay][4])
+    round5TickEl.classList.add("shown");
+
+  if(dayRoundCompleted[currentDay][5])
+    round6TickEl.classList.add("shown");
+
+  if(dayRoundCompleted[currentDay][6])
+    writingTick.style.opacity = "1";
+
+}
+
+    /* =======================
+       錄音 / ASR 共用
+    ======================= */
+
+    let currentAudio = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let currentRecordingCard = null; // { speakImg, loaderEl, speakBtn, target, mode, onCorrect, onIncorrect }
+    let sharedStream = null;
+
+    function supportsRecording() {
+      return !!(
+        navigator.mediaDevices &&
+        navigator.mediaDevices.getUserMedia &&
+        window.MediaRecorder
+      );
+    }
+
+    async function getSharedStream() {
+      if (sharedStream) return sharedStream;
+      sharedStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      return sharedStream;
+    }
+
+    async function evalCharPronunciation(blob, targetChar) {
+      const formData = new FormData();
+      formData.append("audio", blob, "audio.webm");
+      formData.append("target_sentence", targetChar);
+
+      const res = await fetch(WHISPER_BASE_URL + "/transcribe_char", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      console.log("Round1/Char result:", data);
+      return !!data.correct;
+    }
+
+async function evalSequencePronunciation(blob, targetSequence) {
+  const formData = new FormData();
+  formData.append("audio", blob, "audio.webm");
+  formData.append("target_sequence", targetSequence);
+
+  const res = await fetch(WHISPER_BASE_URL + "/transcribe_sequence", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await res.json();
+
+  console.log("Sequence result:", data);
+
+  return {
+    correct: !!data.correct,
+    transcript: data.transcript_clean || ""
+  };
+}
+    async function startRecording(cardState) {
+      if (!supportsRecording()) {
+        alert("This browser does not support recording (MediaRecorder).");
+        cardState.speakImg.src = "image/speak.png";
+        cardState.speakImg.style.display = "block";
+        cardState.loaderEl.style.display = "none";
+        return;
+      }
+
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        return;
+      }
+
+      try {
+        const stream = await getSharedStream();
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        currentRecordingCard = { ...cardState };
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          const card = currentRecordingCard;
+          currentRecordingCard = null;
+          mediaRecorder = null;
+          if (!card) return;
+
+          const blob = new Blob(audioChunks, { type: "audio/webm" });
+
+          card.speakImg.style.display = "none";
+          card.loaderEl.style.display = "block";
+
+          let ok = false;
+          if (card.mode === "sequence") {
+const result = await evalSequencePronunciation(
+  blob,
+  card.target
+);
+
+ok = result.correct;
+
+card.transcript = result.transcript;
+
+// ★ 新增
+window.lastTranscript = result.transcript;
+          } else {
+            ok = await evalCharPronunciation(blob, card.target);
+          }
+
+          card.loaderEl.style.display = "none";
+          card.speakImg.style.display = "block";
+
+          if (ok) {
+            card.speakImg.src = "image/tick.png";
+            card.speakBtn.dataset.locked = "false";
+            if (typeof card.onCorrect === "function") card.onCorrect();
+          } else {
+            card.speakImg.src = "image/cross.png";
+            card.speakBtn.dataset.locked = "true";
+            if (typeof card.onIncorrect === "function") card.onIncorrect();
+            setTimeout(() => {
+              card.speakImg.src = "image/speak.png";
+              card.speakBtn.dataset.locked = "false";
+            }, 2000);
+          }
+if(sharedStream){
+
+  sharedStream
+    .getTracks()
+    .forEach(track => track.stop());
+
+  sharedStream = null;
+
+}
+        };
+
+        mediaRecorder.start();
+      } catch (err) {
+        console.error("Mic error:", err);
+        alert("Cannot access microphone.");
+        sharedStream = null;
+        cardState.speakImg.src = "image/speak.png";
+        cardState.speakImg.style.display = "block";
+        cardState.loaderEl.style.display = "none";
+      }
+    }
+
+/* =======================
+   Round 1：生字（Listen）
+======================= */
+
+const cardsRowRound1 = document.getElementById("cardsRowRound1");
+const round1TickEl   = document.getElementById("round1Tick");
+
+// 記錄邊啲字已經「按過 play」
+let round1Played = {};
+
+// 重設 Round1 狀態
+function resetRound1State() {
+  round1Played = {};
+  if (round1TickEl) round1TickEl.classList.remove("shown");
+}
+
+// 檢查 Round1 是否完成（5 個字全部按過 play）
+function checkRound1Complete() {
+
+  const words =
+    dayWords[currentDay] ||
+    [];
+
+  console.log(
+    "played=",
+    round1Played
+  );
+
+  console.log(
+    "words=",
+    words
+  );
+
+  const allPlayed =
+    words.every(ch => round1Played[ch]);
+
+  console.log(
+    "allPlayed=",
+    allPlayed
+  );
+
+  if (allPlayed) {
+
+    console.log(
+      "ROUND1 COMPLETED"
+    );
+
+    round1TickEl.classList.add("shown");
+    setRoundCompleted(currentDay, 1);
+
+  } else {
+
+    round1TickEl.classList.remove("shown");
+
+  }
+}
+
+// 共用：顯示 gif 3 秒
+function showPicOnce(bigChar, gifImg) {
+  if (!gifImg || gifImg.dataset.hasPic === "false") return;
+  bigChar.classList.add("show-pic");
+  setTimeout(() => {
+    bigChar.classList.remove("show-pic");
+  }, 3000);   // 顯示 3 秒
+}
+
+function renderRound1() {
+  cardsRowRound1.innerHTML = "";
+  resetRound1State();
+
+  const words =
+    dayWords[currentDay] ||
+    (dayData[currentDay]?.title ? dayData[currentDay].title.split("、") : []);
+
+  if (!words.length) {
+    const msg = document.createElement("div");
+    msg.textContent = "此日的詳細內容未設定。";
+    cardsRowRound1.appendChild(msg);
+    return;
+  }
+
+  words.forEach((char, index) => {
+    const card = document.createElement("section");
+    card.className = "word-card";
+
+    const dayStr    = String(currentDay).padStart(2, "0");
+    const wordIndex = index + 1;
+
+    // ------- 中文 + 圖片區（底圖 pica + 上面 gif 圖）-------
+
+    const bigChar = document.createElement("div");
+    bigChar.className = "main-char";
+
+    // 底層原本大字圖：pica_xx_dxx_wx_x.png
+    const baseImg = document.createElement("img");
+    baseImg.className = "base-image";
+    baseImg.src = `image/pica_p1_d${dayStr}_w${wordIndex}_${char}.png`;
+    baseImg.alt = char;
+    bigChar.appendChild(baseImg);
+
+    // 上層 gif：pic_xx_dxx_wx_x.gif（可能冇）
+    const gifImg = document.createElement("img");
+    gifImg.className = "char-image";
+    gifImg.src = `image/pic_p1_d${dayStr}_w${wordIndex}_${char}.gif`;
+    gifImg.alt = char;
+    gifImg.dataset.hasPic = "true";
+
+    gifImg.addEventListener("error", () => {
+      // 冇呢張 gif → 唔好顯示 broken icon
+      gifImg.dataset.hasPic = "false";
+      gifImg.style.display = "none";
+    });
+
+    bigChar.appendChild(gifImg);
+
+    // 滑鼠移入：如果有 gif，就播 3 秒
+    bigChar.addEventListener("mouseenter", () => {
+      showPicOnce(bigChar, gifImg);
+    });
+
+    // ------- 英文解釋 -------
+
+    const translation = document.createElement("div");
+    translation.className = "translation";
+    translation.textContent = wordTranslations[char] || "";
+
+    // ------- 播放按鈕（play.png）-------
+
+    const actionsRow = document.createElement("div");
+    actionsRow.className = "actions-row";
+
+    const playBtn = document.createElement("button");
+    playBtn.className = "icon-btn";
+
+    const playImg = document.createElement("img");
+    playImg.className = "icon-img";
+    playImg.src = "image/play.png";
+    playImg.alt = "Play";
+
+    playBtn.appendChild(playImg);
+    actionsRow.appendChild(playBtn);
+
+    // click play → 播音 + 播 gif 3 秒 + 記錄已播放
+    playBtn.addEventListener("click", () => {
+      const src = `audio/p1_d${dayStr}_w${wordIndex}_${char}.mp3`;
+
+      if (currentAudio) currentAudio.pause();
+      currentAudio = new Audio(src);
+      currentAudio.play().catch((err) => {
+        console.warn("播放音檔失敗：", src, err);
+        alert("找不到音檔：\n" + src);
+      });
+
+      // ✅ 標記呢個字已經按過 play
+      round1Played[char] = true;
+      checkRound1Complete();
+
+      // 如果有 gif，就播 3 秒
+      showPicOnce(bigChar, gifImg);
+    });
+
+    // 組裝 card
+    card.appendChild(bigChar);
+    card.appendChild(translation);
+    card.appendChild(actionsRow);
+
+    cardsRowRound1.appendChild(card);
+  });
+
+  // ✅ 進入某一 Day 之後 2 秒：
+  //    對所有「有 gif」嘅字，自動播一次 gif 3 秒
+  setTimeout(() => {
+    cardsRowRound1.querySelectorAll(".main-char").forEach(bigChar => {
+      const gifImg = bigChar.querySelector(".char-image");
+      if (!gifImg || gifImg.dataset.hasPic === "false") return;
+      showPicOnce(bigChar, gifImg);
+    });
+  }, 1500);
+}
+
+/* =======================
+   新 Round 2：Listen & Choose
+======================= */
+
+const round2ListenBoardEl = document.getElementById("round2ListenBoard");
+const round2ListenTickEl  = document.getElementById("round2ListenTick");
+const round2PlayBtn      = document.getElementById("round2PlayBtn");
+
+let round2Remaining = [];        // 仲未答嘅字
+let round2AnswerChar = "";       // 今次正確答案
+let round2CurrentAudio = null;
+let round2Finished = false;
+let round2UserHasInteracted = false;
+
+
+function renderRound2ListenChoose() {
+  round2ListenBoardEl.innerHTML = "";
+
+  const words =
+    dayWords[currentDay] ||
+    (dayData[currentDay]?.title
+      ? dayData[currentDay].title.split("、")
+      : []);
+
+  if (words.length < 5) return;
+
+  // 🔁 新一輪（或首次進入）
+if (round2Remaining.length === 0) {
+  round2Remaining = [...words];
+  // ❌ 不要 reset round2Finished
+}
+
+  // 🎯 揀一個未答過嘅字
+  const randomIdx = Math.floor(Math.random() * round2Remaining.length);
+  round2AnswerChar = round2Remaining[randomIdx];
+
+  // ✅ 正確計算 w1–w5 index（非常重要）
+  const wordIndex = words.indexOf(round2AnswerChar) + 1;
+
+  round2CurrentAudio = new Audio(
+    `audio/p1_d${String(currentDay).padStart(2, "0")}_w${wordIndex}_${round2AnswerChar}.mp3`
+  );
+
+  // 🔊 只係「未完成 round」先自動播一次
+if (!round2Finished && round2UserHasInteracted) {
+  round2CurrentAudio.play().catch(() => {});
+}
+
+  // 🃏 畫卡（只畫未答嘅）
+  round2Remaining.forEach(ch => {
+    const card = document.createElement("div");
+    card.className = "match-card match-card-cn";
+    card.textContent = ch;
+
+    card.addEventListener("click", () => {
+      if (ch === round2AnswerChar) {
+        // ✅ 答啱
+        card.classList.add("magic-vanish");
+
+        setTimeout(() => {
+          round2Remaining = round2Remaining.filter(c => c !== ch);
+
+          if (round2Remaining.length === 0) {
+            // 🎉 全部完成
+            round2ListenTickEl.classList.add("shown");
+            setRoundCompleted(currentDay, 2);
+            round2Finished = true;
+
+            // ♻️ 卡片重生，但「唔自動播」
+ setTimeout(() => {
+  // 只重畫 5 張卡，不重新出題、不播音
+  round2ListenBoardEl.innerHTML = "";
+
+  words.forEach(ch => {
+    const card = document.createElement("div");
+    card.className = "match-card match-card-cn";
+    card.textContent = ch;
+    round2ListenBoardEl.appendChild(card);
+  });
+}, 800);
+
+          } else {
+            // ▶️ 自動播下一題
+            renderRound2ListenChoose();
+          }
+        }, 350);
+      } else {
+        // ❌ 答錯
+        card.classList.add("shake");
+        setTimeout(() => card.classList.remove("shake"), 300);
+      }
+    });
+
+    round2ListenBoardEl.appendChild(card);
+  });
+}
+
+/* ▶️ Speaker：只喺玩家 click 時播 */
+round2PlayBtn.onclick = () => {
+
+if(round2Finished){
+  restartRound2();
+
+  return;
+}
+
+  if (!round2CurrentAudio) return;
+
+  round2UserHasInteracted = true;
+
+  round2CurrentAudio.currentTime = 0;
+  round2CurrentAudio.play();
+};
+
+function restartRound2(){
+round2Finished = false;
+round2UserHasInteracted = true;
+
+  round2Remaining =
+    [...getDayWords(currentDay)];
+
+  round2AnswerChar = "";
+  round2CurrentAudio = null;
+
+  round2UserHasInteracted = true;
+
+  renderRound2ListenChoose();
+
+  setTimeout(() => {
+
+    if(round2CurrentAudio){
+
+      round2CurrentAudio.currentTime = 0;
+      round2CurrentAudio.play();
+
+    }
+
+  }, 100);
+
+}
+function getDayWords(day) {
+  if (dayWords && dayWords[day]?.length) {
+    return dayWords[day];
+  }
+
+  if (dayData?.[day]?.words?.length) {
+    return dayData[day].words;
+  }
+
+  if (dayData?.[day]?.title) {
+    return dayData[day].title.split("、");
+  }
+
+  return [];
+}
+
+function resetRound2ListenChooseState() {
+  round2Remaining = [];
+  round2AnswerChar = "";
+  round2CurrentAudio = null;
+  round2Finished = false;
+  round2UserHasInteracted = false;   // ← 加呢句
+
+  if (round2ListenTickEl) {
+    round2ListenTickEl.classList.remove("shown");
+  }
+}
+
+
+
+    /* =======================
+       共用：Matching（Round 3 & 5）
+    ======================= */
+
+    function buildMatchingRound(containerEl, leftItems, rightItems, roundIndex, tickEl) {
+      containerEl.innerHTML = "";
+      let selectedCards = [];
+      let matchedCount = 0;
+      const totalPairs = leftItems.length;
+
+      const cards = [];
+
+      leftItems.forEach((txt, i) => {
+        cards.push({
+          id: "L" + i,
+          text: txt,
+          pairKey: i,
+          type: "cn"
+        });
+      });
+
+      rightItems.forEach((txt, i) => {
+        cards.push({
+          id: "R" + i,
+          text: txt,
+          pairKey: i,
+          type: "en"
+        });
+      });
+
+      // 簡單洗牌
+      cards.sort(() => Math.random() - 0.5);
+
+      cards.forEach(cardData => {
+        const card = document.createElement("div");
+        card.className = "match-card " +
+          (cardData.type === "cn" ? "match-card-cn" : "match-card-en");
+        card.textContent = cardData.text;
+        card.dataset.id = cardData.id;
+        card.dataset.key = cardData.pairKey;
+        card.dataset.type = cardData.type;
+        containerEl.appendChild(card);
+
+        card.addEventListener("click", () => {
+          if (card.classList.contains("matched")) return;
+          if (card.classList.contains("shake") || card.classList.contains("magic-vanish")) return;
+
+          if (selectedCards.find(c => c.card === card)) return;
+
+          card.classList.add("selected");
+          selectedCards.push({ card, data: cardData });
+
+          if (selectedCards.length === 2) {
+            const [c1, c2] = selectedCards;
+            const sameKey = c1.data.pairKey === c2.data.pairKey;
+            const differentType = c1.data.type !== c2.data.type;
+
+            if (sameKey && differentType) {
+              // 正確 → magic vanish
+              c1.card.classList.add("matched", "magic-vanish");
+              c2.card.classList.add("matched", "magic-vanish");
+              matchedCount++;
+
+              setTimeout(() => {
+                c1.card.style.visibility = "hidden";
+                c2.card.style.visibility = "hidden";
+              }, 400);
+
+              if (matchedCount === totalPairs) {
+                if (tickEl) {
+                  tickEl.classList.add("shown");
+                }
+                setRoundCompleted(currentDay, roundIndex);
+                // 1.2 秒後重新顯示 10 張咭
+                setTimeout(() => {
+                  buildMatchingRound(containerEl, leftItems, rightItems, roundIndex, tickEl);
+                }, 1200);
+              }
+            } else {
+              // 錯誤 → shake
+              c1.card.classList.add("shake");
+              c2.card.classList.add("shake");
+              setTimeout(() => {
+                c1.card.classList.remove("shake", "selected");
+                c2.card.classList.remove("shake", "selected");
+              }, 350);
+            }
+
+            selectedCards = [];
+          }
+        });
+      });
+    }
+
+    /* =======================
+       Round 3
+    ======================= */
+
+const round3BoardEl = document.getElementById("round3Board");
+const round3TickEl  = document.getElementById("round3Tick");
+
+function renderRound3() {
+  round3BoardEl.innerHTML = "";
+
+  // 用「當日」嘅 5 個字（同 Round 1 / Round 2 一樣來源）
+  const words =
+    dayWords[currentDay] ||
+    (dayData[currentDay]?.title ? dayData[currentDay].title.split("、") : []);
+
+  if (!words.length) {
+    const msg = document.createElement("div");
+    msg.textContent = "此日尚未設定生字，無法進行 Matching。";
+    round3BoardEl.appendChild(msg);
+    return;
+  }
+
+  // 根據每個字搵英文
+  const meanings = words.map(ch => wordTranslations[ch] || "");
+
+  // 用當日的 words + meanings 來做配對遊戲
+  buildMatchingRound(round3BoardEl, words, meanings, 3, round3TickEl);
+}
+
+    /* =======================
+       Round 4：詞語
+    ======================= */
+
+    const cardsRowRound4 = document.getElementById("cardsRowRound4");
+    const round4TickEl = document.getElementById("round4Tick");
+    let phraseCorrect = {};
+
+function checkRound4Complete() {
+  const phrases = dayPhrases[currentDay] || [];
+  if (!phrases.length) return;
+
+  const allOk = phrases.every(ph => phraseCorrect[ph]);
+
+  if (round4TickEl) {
+    if (allOk) {
+      round4TickEl.classList.add("shown");
+      setRoundCompleted(currentDay, 4);
+    } else {
+      round4TickEl.classList.remove("shown");
+    }
+  }
+}
+
+    function renderRound4() {
+      cardsRowRound4.innerHTML = "";
+      phraseCorrect = {};
+
+      const phrases = dayPhrases[currentDay] || [];
+
+if (!phrases.length) {
+  cardsRowRound4.innerHTML = "";
+  return;
+}
+      phrases.forEach((ph, index) => {
+        const card = document.createElement("section");
+        card.className = "word-card";
+
+        const bigPhrase = document.createElement("div");
+        bigPhrase.className = "main-char phrase-text";
+        bigPhrase.textContent = ph;
+
+        const translation = document.createElement("div");
+        translation.className = "translation";
+        translation.textContent = phraseTranslations[ph] || "";
+
+        const actionsRow = document.createElement("div");
+        actionsRow.className = "actions-row";
+
+        const speakBtn = document.createElement("button");
+        speakBtn.className = "icon-btn";
+        speakBtn.dataset.locked = "false";
+
+        const speakImg = document.createElement("img");
+        speakImg.className = "icon-img";
+        speakImg.src = "image/speak.png";
+        speakImg.alt = "Speak";
+
+        const loaderEl = document.createElement("div");
+        loaderEl.className = "loader-rotate";
+
+        speakBtn.appendChild(speakImg);
+        actionsRow.appendChild(speakBtn);
+        actionsRow.appendChild(loaderEl);
+
+        // click 詞語 → 播音（你可以之後加 audio 檔）
+        bigPhrase.addEventListener("click", () => {
+          const dayStr = String(currentDay).padStart(2, "0");
+          const wordIndex = index + 1;
+          const src = `audio/p1_d${dayStr}_ph${wordIndex}_${ph}.mp3`;
+
+          if (currentAudio) currentAudio.pause();
+          currentAudio = new Audio(src);
+          currentAudio.play().catch((err) => {
+            console.warn("播放音檔失敗：", src, err);
+            alert("找不到音檔：\n" + src);
+          });
+        });
+
+        speakBtn.addEventListener("click", () => {
+          if (speakBtn.dataset.locked === "true") return;
+
+          if (
+            mediaRecorder &&
+            mediaRecorder.state === "recording" &&
+            currentRecordingCard &&
+            currentRecordingCard.speakImg === speakImg
+          ) {
+            mediaRecorder.stop();
+            return;
+          }
+
+          if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+          }
+
+          speakImg.src = "image/stop.png";
+          speakImg.style.display = "block";
+          loaderEl.style.display = "none";
+
+          startRecording({
+            speakImg,
+            loaderEl,
+            speakBtn,
+            target: ph,
+            mode: "sequence",
+            onCorrect: () => {
+              phraseCorrect[ph] = true;
+              checkRound4Complete();
+            }
+          });
+        });
+
+        card.appendChild(bigPhrase);
+        card.appendChild(translation);
+        card.appendChild(actionsRow);
+        cardsRowRound4.appendChild(card);
+      });
+
+      checkRound4Complete();
+    }
+
+    /* =======================
+       Round 5 Matching（詞語）
+    ======================= */
+
+const round5BoardEl = document.getElementById("round5Board");
+const round5TickEl  = document.getElementById("round5Tick");
+
+function renderRound5() {
+  round5BoardEl.innerHTML = "";
+
+  const phrases = dayPhrases[currentDay] || [];
+  if (!phrases.length) {
+    const msg = document.createElement("div");
+    msg.textContent = "此日的詞語尚未設定。";
+    round5BoardEl.appendChild(msg);
+    return;
+  }
+
+  const meanings = phrases.map(ph => phraseTranslations[ph] || "");
+  buildMatchingRound(round5BoardEl, phrases, meanings, 5, round5TickEl);
+}
+
+    /* =======================
+       Round 6：句子
+    ======================= */
+
+    const round6ListEl = document.getElementById("round6List");
+    const round6TickEl = document.getElementById("round6Tick");
+    let round6Correct = [];
+
+    function resetRound6State() {
+      const sentences = daySentences[currentDay] || [];
+      round6Correct = sentences.map(() => false);
+      if (round6TickEl) round6TickEl.classList.remove("shown");
+    }
+
+   
+function findWrongIndexes(target, transcript) {
+
+  const m = target.length;
+  const n = transcript.length;
+
+  const dp = Array(m + 1)
+    .fill(null)
+    .map(() => Array(n + 1).fill(0));
+
+  for (let i = m - 1; i >= 0; i--) {
+    for (let j = n - 1; j >= 0; j--) {
+
+      if (target[i] === transcript[j]) {
+        dp[i][j] = dp[i + 1][j + 1] + 1;
+      } else {
+        dp[i][j] = Math.max(
+          dp[i + 1][j],
+          dp[i][j + 1]
+        );
+      }
+
+    }
+  }
+
+  const matched = new Set();
+
+  let i = 0;
+  let j = 0;
+
+  while (i < m && j < n) {
+
+    if (target[i] === transcript[j]) {
+      matched.add(i);
+      i++;
+      j++;
+    }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      i++;
+    }
+    else {
+      j++;
+    }
+
+  }
+
+  const wrong = [];
+
+  for (let k = 0; k < m; k++) {
+    if (!matched.has(k)) {
+      wrong.push(k);
+    }
+  }
+
+  return wrong;
+}
+
+function renderSentenceWithErrors(sentence, wrongIndexes) {
+  return sentence
+    .split("")
+    .map((ch, idx) => {
+      if (wrongIndexes.includes(idx)) {
+        return `<span class="wrong-char">${ch}</span>`;
+      }
+      return ch;
+    })
+    .join("");
+}
+
+ function checkRound6Complete() {
+      const allOk = round6Correct.length && round6Correct.every(Boolean);
+      if (round6TickEl) {
+        if (allOk) {
+          round6TickEl.classList.add("shown");
+          setRoundCompleted(currentDay, 6);
+        } else {
+          round6TickEl.classList.remove("shown");
+        }
+      }
+    }
+
+    // ===== Summary：列出 Day 內所有「字 + 詞語 + 句子」 =====
+
+function renderSummary() {
+  if (!summaryListEl) return;
+
+  const items = [];
+
+  // 生字
+  const words =
+    dayWords[currentDay] ||
+    (dayData[currentDay]?.title ? dayData[currentDay].title.split("、") : []);
+  words.forEach((ch, i) => {
+    const audio = `audio/p1_d${String(currentDay).padStart(2, "0")}_w${i + 1}_${ch}.mp3`;
+    items.push({ cn: ch, en: wordTranslations[ch] || "", audio });
+  });
+
+  // 詞語
+  const phrases = dayPhrases[currentDay] || [];
+  phrases.forEach((ph, i) => {
+    const audio = `audio/p1_d${String(currentDay).padStart(2, "0")}_ph${i + 1}_${ph}.mp3`;
+    items.push({ cn: ph, en: phraseTranslations[ph] || "", audio });
+  });
+
+  // 句子
+  const sentences = daySentences[currentDay] || [];
+  sentences.forEach((s, i) => {
+    const cleanCN = s.cn.replace(/[！？?。，、]/g, "");
+    const audio = `audio/p1_d${String(currentDay).padStart(2, "0")}_s${i + 1}_${cleanCN}.mp3`;
+    items.push({ cn: s.cn, en: s.en, audio });
+  });
+
+  let html = `
+    <table class="summary-table">
+      <tbody>
+  `;
+
+  for (const row of items) {
+    html += `
+      <tr>
+        <td style="width:40px;">
+          <img src="image/play.png" class="summary-play" data-audio="${row.audio}"
+               style="width:24px; cursor:pointer; vertical-align:middle; margin-right:6px;">
+        </td>
+        <td class="summary-cn">${row.cn}</td>
+        <td class="summary-en">${row.en}</td>
+      </tr>
+    `;
+  }
+
+  html += "</tbody></table>";
+  summaryListEl.innerHTML = html;
+
+  // 播放事件
+  document.querySelectorAll(".summary-play").forEach(icon => {
+    icon.addEventListener("click", () => {
+      const src = icon.dataset.audio;
+      const audio = new Audio(src);
+      audio.play().catch(err => {
+        console.warn("播放失敗：", src, err);
+        alert("找不到音檔：\n" + src);
+      });
+    });
+  });
+}
+
+function updateRoundVisibilityForDay() {
+  const phrases   = dayPhrases[currentDay]   || [];
+  const sentences = daySentences[currentDay] || [];
+
+  const hasPhrases   = phrases.length > 0;
+  const hasSentences = sentences.length > 0;
+
+  // 1️⃣ 沒有詞語 → Round 4 & 5 完全唔顯示
+  if (round4SectionEl) {
+    round4SectionEl.style.display = hasPhrases ? "" : "none";
+  }
+  if (round5SectionEl) {
+    round5SectionEl.style.display = hasPhrases ? "" : "none";
+  }
+}
+
+
+function renderRound6() {
+  const sentences = daySentences[currentDay] || [];
+
+  // 🔴 冇句子：收起 Round 6（包括佢自己上面嗰條線）
+  if (!sentences.length) {
+    if (round6Section) {
+      round6Section.style.display = "none";
+    }
+
+    round6ListEl.innerHTML = "";
+    if (round6TickEl) {
+      round6TickEl.classList.remove("shown");
+    }
+    return;
+  }
+
+  // ✅ 有句子：顯示 Round 6
+  if (round6Section) {
+    round6Section.style.display = "";
+  }
+
+  round6ListEl.innerHTML = "";
+  resetRound6State();
+
+  sentences.forEach((sent, idx) => {
+    const row = document.createElement("div");
+    row.className = "round6-item";
+
+    const left = document.createElement("div");
+
+    const cnEl = document.createElement("div");
+    cnEl.className = "round6-sentence-cn";
+    cnEl.textContent = sent.cn;
+
+    const enEl = document.createElement("div");
+    enEl.className = "round6-sentence-en";
+    enEl.textContent = sent.en;
+
+    left.appendChild(cnEl);
+    left.appendChild(enEl);
+
+    const right = document.createElement("div");
+    right.className = "round6-right";
+
+    const speakBtn = document.createElement("button");
+    speakBtn.className = "icon-btn";
+    speakBtn.dataset.locked = "false";
+
+    const speakImg = document.createElement("img");
+    speakImg.className = "icon-img";
+    speakImg.src = "image/speak.png";
+    speakImg.alt = "Speak";
+
+    const loaderEl = document.createElement("div");
+    loaderEl.className = "loader-rotate";
+
+    const statusEl = document.createElement("div");
+    statusEl.className = "round6-status";
+
+    speakBtn.appendChild(speakImg);
+    right.appendChild(speakBtn);
+    right.appendChild(loaderEl);
+    right.appendChild(statusEl);
+
+    row.appendChild(left);
+    row.appendChild(right);
+    round6ListEl.appendChild(row);
+
+    speakBtn.addEventListener("click", () => {
+      if (speakBtn.dataset.locked === "true") return;
+
+      if (
+        mediaRecorder &&
+        mediaRecorder.state === "recording" &&
+        currentRecordingCard &&
+        currentRecordingCard.speakImg === speakImg
+      ) {
+        mediaRecorder.stop();
+        return;
+      }
+
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+      }
+
+      speakImg.src = "image/stop.png";
+      speakImg.style.display = "block";
+      loaderEl.style.display = "none";
+
+      startRecording({
+        speakImg,
+        loaderEl,
+        speakBtn,
+        target: sent.cn,
+        mode: "sequence",
+        onCorrect: () => {
+          round6Correct[idx] = true;
+          cnEl.textContent = sent.cn;
+          statusEl.textContent = "";
+          statusEl.classList.remove("ok", "bad");
+          checkRound6Complete();
+        },
+onIncorrect: () => {
+const transcript = window.lastTranscript || "";
+  const wrongIndexes = findWrongIndexes(
+    sent.cn.replace(/[！？?。，、]/g, ""),
+    transcript
+  );
+
+console.log("TRANSCRIPT =", transcript);
+console.log("TARGET =", sent.cn);
+console.log("WRONG =", wrongIndexes);
+
+  cnEl.innerHTML = renderSentenceWithErrors(
+    sent.cn,
+    wrongIndexes
+  );
+
+  statusEl.textContent = "";
+  statusEl.classList.remove("ok", "bad");
+}
+      });
+    });
+  });
+
+  checkRound6Complete();
+}
+
+function resetRoundsForDay(day) {
+
+  dayRoundCompleted[day] = Array(7).fill(false);
+
+  for(let round = 1; round <= 7; round++){
+
+    if(
+      localStorage.getItem(
+        `day-${day}-round-${round}`
+      ) === "done"
+    ){
+      dayRoundCompleted[day][round - 1] = true;
+    }
+
+  }
+
+}
+
+function getTotalRoundsForDay(day) {
+
+  let total = 0;
+
+  total++;
+  total++;
+
+  if(getDayWords(day).length) total++;
+  if(dayPhrases?.[day]?.length) total++;
+  if(dayPhrases?.[day]?.length) total++;
+  if(daySentences?.[day]?.length) total++;
+
+  // Writing
+  total++;
+
+  return total;
+}
+
+function resetAllRoundTicks() {
+  [
+    round1TickEl,
+    round2ListenTickEl,
+    round3TickEl,
+    round4TickEl,
+    round5TickEl,
+    round6TickEl
+  ].forEach(el => {
+    if (el) el.classList.remove("shown");
+  });
+}
+
+function clearDayProgress(day){
+
+  for(let round = 1; round <= 7; round++){
+
+    localStorage.removeItem(
+      `day-${day}-round-${round}`
+    );
+
+  }
+
+  localStorage.removeItem(
+    `writing-${day}`
+  );
+
+  dayRoundCompleted[day] =
+    Array(7).fill(false);
+
+  if(day === currentDay){
+
+    resetAllRoundTicks();
+
+    resetRound1State();
+resetRound2ListenChooseState();
+renderRound2ListenChoose();
+renderRound4();
+    const writingTick =
+      document.getElementById(
+        "writingTick"
+      );
+
+    if(writingTick){
+      writingTick.style.opacity = "0";
+    }
+const writingFrame =
+  document.getElementById(
+    "writingFrame"
+  );
+
+if(writingFrame){
+
+  writingFrame.src =
+    writingFrame.src;
+
+}
+  }
+
+  renderDayList();
+
+console.log("CLEAR DAY", day);
+}
+
+/* =======================
+   初始化
+======================= */
+
+for(let day = 1; day <= TOTAL_DAYS; day++){
+  loadRoundProgress(day);
+}
+
+renderDayList();
+setCurrentDay(1);
+  </script>
+</body>
+</html>
